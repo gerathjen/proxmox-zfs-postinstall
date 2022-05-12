@@ -1,8 +1,10 @@
 #!/bin/bash
 
+# get zpool name and save the output into the variable rpool
+rpool="$(zpool list -Ho name)"
 # create zfs filesystems
-zfs create -o com.sun:auto-snapshot=false -o mountpoint=/var/lib/docker rpool/docker
-zfs create -o com.sun:auto-snapshot=true -o mountpoint=/portainer rpool/portainer
+zfs create -o com.sun:auto-snapshot=false -o mountpoint=/var/lib/docker $rpool/docker
+zfs create -o com.sun:auto-snapshot=true -o mountpoint=/portainer $rpool/portainer
 
 # add docker repository
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
@@ -13,9 +15,9 @@ apt update
 DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt install -y -qq --no-install-recommends docker-ce docker-ce-cli containerd.io docker-compose
 
 # install portainer
-cd /portainer
-mkdir data
-cat << EOF > /portainer/docker-compose.yml
+    cd /portainer
+    mkdir data
+    cat << EOF > /portainer/docker-compose.yml
 version: '3.2'
 
 services:
@@ -23,12 +25,11 @@ services:
   portainer:
     image: portainer/portainer-ce
     ports:
-      - "9443:9443"
-      - "8000:8000"
+      - "9000:9000"
     volumes:
       - /portainer/data:/data
       - /var/run/docker.sock:/var/run/docker.sock
     restart: always
 EOF
-# start portainer
-docker-compose up -d
+    # start portainer
+    docker-compose up -d
