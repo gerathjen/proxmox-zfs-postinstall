@@ -2,6 +2,9 @@
 
 ###### CONFIG SECTION ######
 
+# Variable setting for zpool name
+rpool="$(zpool list -Ho name)"
+
 # Define basic tools to install
 TOOLS="sudo vim ifupdown2 libpve-network-perl net-tools dnsutils ethtool git curl unzip screen iftop lshw smartmontools nvme-cli lsscsi sysstat zfs-auto-snapshot htop mc rpl lsb-release"
 
@@ -9,7 +12,7 @@ TOOLS="sudo vim ifupdown2 libpve-network-perl net-tools dnsutils ethtool git cur
 
 # Define target dataset for backup of /etc
 # IMPORTANT NOTE: Don't type in the leading /, this will be set where needed
-PVE_CONF_BACKUP_TARGET=rpool/pveconf
+PVE_CONF_BACKUP_TARGET=$rpool/pveconf
 
 # Define timer for your backup cronjob (default: every 15 minutes fron 3 through 59)
 PVE_CONF_BACKUP_CRON_TIMER="3,18,33,48 * * * *"
@@ -217,7 +220,7 @@ if [ $? -ne 0 ]; then
     zfs create $PVE_CONF_BACKUP_TARGET
 fi
 
-if [[ "$(df -h -t zfs | grep /$ | cut -d ' ' -f1)" == "rpool/ROOT/pve-1" ]] ; then
+if [[ "$(df -h -t zfs | grep /$ | cut -d ' ' -f1)" == "$rpool/ROOT/pve-1" ]] ; then
   echo "$PVE_CONF_BACKUP_CRON_TIMER root rsync -va --delete /etc /$PVE_CONF_BACKUP_TARGET > /$PVE_CONF_BACKUP_TARGET/pve-conf-backup.log" > /etc/cron.d/pve-conf-backup
 fi
 
